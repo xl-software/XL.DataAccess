@@ -1,11 +1,10 @@
 # XL.DataAccess
 Simple Data Access Object for EntityFramework (.NET Framework)
 
-# Simple Data Access Object for EntityFramework
 #### Quick, simple and powerful
 **XL.DataAccess** is just a sigle **Data Access Object Class** that aims for simplicity. 
 It works for both **Code First** and **Database First**. 
-##### Just plug in your Entity Framework connectionString and let the magic begin
+##### Just plug in your Entity Framework connectionString, your mapped entity model and let the magic begin
 
 
 
@@ -25,8 +24,8 @@ DAO dao = new DAO();
 ```
 ```csharp
 // New DAO with Connection String ID
-// It takes as a parameter the connection string ID corresponding with one yout have defined in the web.config
-// Is more explicit and it's the way to go if you have more than one connectionString defined under <connectionString>
+// It takes as a parameter the connection string ID corresponding with one you have defined in the web.config
+// It's more explicit and it's the way to go if you have more than one connectionString defined under <connectionString>
 DAO dao = new DAO("DatabaseEntityID");
 ```
 ```csharp
