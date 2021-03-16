@@ -4,16 +4,26 @@ Simple Data Access Object for EntityFramework (.NET Framework)
 #### Quick, simple and powerful
 **XL.DataAccess** is just a sigle **Data Access Object Class** that aims for simplicity. 
 It works for both **Code First** and **Database First**. 
-##### Just plug in your Entity Framework connectionString, your mapped entity model and let the magic begin
-
-
 
 ## How to use
-- Include both XL.DataAccess and the namespace where your models are located
+- Include both XL.DataAccess and the namespace where your EntityFramework models are located
 ```csharp
-using EntityFrameworkModelsNamespace;
-using XL.DataAccess;
+using EntityFramework.Models.Namespace; // Your custom database models
+using XL.DataAccess; // This library
 ```
+
+- Instantiate new Data Access Object
+```csharp
+// Init with default Connection String
+DAO dao = new DAO();
+
+// Init with Connection String ID
+DAO dao = new DAO("DatabaseEntities");
+
+// Init with RAW Connection String
+DAO dao = new DAO("metadata=res://*/Model.csdl|res://*/Model.ssdl|res://*/Model.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=localhost;initial catalog=DatabaseName;persist security info=True;user id=UserName;password=UserPassword;MultipleActiveResultSets=True;App=EntityFramework&quot;");
+```
+
 - Instanciate new DAO object with your EntityFramework connectionString
     -   There are 3 different ways to instantiate your data access object
 ```csharp
