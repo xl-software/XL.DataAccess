@@ -80,6 +80,32 @@ namespace XL.DataAccess
 
         #endregion
 
+        #region GetPaginated
+
+        public virtual PaginatedResult<T> GetPaginated<T>(int page, int limit, Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        {
+            PaginatedResult<T> result = new PaginatedResult<T>();
+
+            using (var db = new DbCtx(_dbContextName))
+            {
+                result.Total = Count<T>(db, where, navigationProperties);
+                result.Items = GetPaginated<T>(db, page, limit, where, navigationProperties);
+                result.Page = page;
+                result.Limit = limit;
+            }
+
+            return result;
+        }
+
+        private IList<T> GetPaginated<T>(DbCtx db, int page, int limit, Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        {
+            IQueryable<T> query = db.GetQuery<T>(where, navigationProperties);
+
+            return query.Skip(page * limit).Take(limit).ToList<T>();
+        }
+
+        #endregion
+
         #region Add
 
         public virtual void Add<T>(params T[] items) where T : class
@@ -159,7 +185,6 @@ namespace XL.DataAccess
         #endregion
 
         #region Aggregate functions
-
 
         #region Exists
 
