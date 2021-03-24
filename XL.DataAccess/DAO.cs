@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Core.Objects.DataClasses;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Migrations;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace XL.DataAccess
 {
@@ -102,6 +106,31 @@ namespace XL.DataAccess
             IQueryable<T> query = db.GetQuery<T>(where, navigationProperties);
 
             return query.Skip(page * limit).Take(limit).ToList<T>();
+        }
+
+        #endregion
+
+        #region Search
+
+        public virtual IList<T> Search<T>(string term, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        {
+            IList<T> list;
+
+            using (var db = new DbCtx(_dbContextName))
+            {
+                var objectSet = ((IObjectContextAdapter)db).ObjectContext.CreateObjectSet<T>();
+
+                    foreach (Expression<Func<T, object>> navigationProperty in navigationProperties)
+                    objectSet = objectSet.Include<T, object>(navigationProperty);
+
+                    .in
+                    .ToTraceString();
+                list = null;
+
+               // list = Search<T>(db, term, navigationProperties);
+            }
+
+            return list;
         }
 
         #endregion
@@ -211,9 +240,26 @@ namespace XL.DataAccess
 
         #region Count
 
-        public virtual long Count<T>(Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        public virtual long LongCount<T>(Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
         {
             long count = 0;
+            using (var db = new DbCtx(_dbContextName))
+            {
+                count = LongCount<T>(db, where, navigationProperties);
+            }
+            return count;
+        }
+
+        private long LongCount<T>(DbCtx db, Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        {
+            IQueryable<T> query = db.GetQuery<T>(where, navigationProperties);
+
+            return query.LongCount<T>();
+        }
+
+        public virtual int Count<T>(Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        {
+            int count = 0;
             using (var db = new DbCtx(_dbContextName))
             {
                 count = Count<T>(db, where, navigationProperties);
@@ -221,11 +267,11 @@ namespace XL.DataAccess
             return count;
         }
 
-        private long Count<T>(DbCtx db, Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
+        private int Count<T>(DbCtx db, Expression<Func<T, bool>> where, params Expression<Func<T, object>>[] navigationProperties) where T : class
         {
             IQueryable<T> query = db.GetQuery<T>(where, navigationProperties);
 
-            return query.LongCount<T>();
+            return query.Count<T>();
         }
 
         #endregion
@@ -288,10 +334,15 @@ namespace XL.DataAccess
         {
             using (var db = new DbCtx(_dbContextName))
             {
-                return db.Database
-                    .SqlQuery<T>(query, parameters ?? new SqlParameter[] { })
-                    .ToList();
+                return Execute<T>(db, query);
             }
+        }
+
+        private IList<T> Execute<T>(DbCtx db, string query, params SqlParameter[] parameters) where T : class
+        {
+            return db.Database
+                .SqlQuery<T>(query, parameters ?? new SqlParameter[] { })
+                .ToList();
         }
 
         public virtual QueryResult Execute(string query, params SqlParameter[] parameters)

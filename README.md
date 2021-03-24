@@ -5,6 +5,9 @@ Simple Data Access Object for EntityFramework (.NET Framework)
 **XL.DataAccess** is just a sigle **Data Access Object Class** that aims for simplicity. 
 It works for both **Code First** and **Database First**. 
 
+## How to install
+// TODO
+
 ## How to use
 - Include both XL.DataAccess and the namespace where your EntityFramework models are located
 ```csharp
@@ -23,6 +26,40 @@ DAO dao = new DAO("DatabaseEntities");
 // Init with RAW Connection String
 DAO dao = new DAO("metadata=res://*/Model.csdl|res://*/Model.ssdl|res://*/Model.msl;provider=System.Data.SqlClient;provider connection string=&quot;data source=localhost;initial catalog=DatabaseName;persist security info=True;user id=UserName;password=UserPassword;MultipleActiveResultSets=True;App=EntityFramework&quot;");
 ```
+
+- Get an item
+```csharp
+// Gets one item
+Product product = dao.Get<Product>(x => x.ProductID == 1);
+
+// Gets one item and loads it's related images
+Product product = dao
+    .Get<Product>(x => x.ProductID == 1,
+                  x => x.Images);
+```
+
+- Get a list of items
+```csharp
+// Gets a list of items
+IList<Product> productList = dao.GetList<Product>(x => x.Price > 20);
+
+// Gets a list of items and loads it's related images
+Product product = dao
+    .Get<Product>(x => x.Price > 20,
+                  x => x.Images);
+```
+
+- Get a list of items with pagination
+```csharp
+// Gets a paginated list of items
+PaginatedResult<Product> paginatedResult = dao.GetPaginated<Product>(0, 20, x => x.Price > 20);
+
+// Gets a paginated list of items and loads it's related images
+PaginatedResult<Product> paginatedResult = dao
+        .GetPaginated<Product>(0, 20, x => x.Price > 20, x => x.Images);
+```
+
+
 
 - Instanciate new DAO object with your EntityFramework connectionString
     -   There are 3 different ways to instantiate your data access object
